@@ -5,9 +5,17 @@
 
 package org.opensearch.alerting.util
 
+import org.junit.Before
+import org.mockito.Mockito
+import org.opensearch.Version
 import org.opensearch.alerting.ANOMALY_RESULT_INDEX
 import org.opensearch.alerting.randomQueryLevelMonitor
+import org.opensearch.cluster.node.DiscoveryNode
+import org.opensearch.cluster.service.ClusterService
 import org.opensearch.common.io.stream.StreamOutput
+import org.opensearch.common.settings.ClusterSettings
+import org.opensearch.common.settings.Setting
+import org.opensearch.common.settings.Settings
 import org.opensearch.common.xcontent.ToXContent
 import org.opensearch.common.xcontent.XContentBuilder
 import org.opensearch.commons.alerting.model.Input
@@ -15,9 +23,30 @@ import org.opensearch.commons.alerting.model.SearchInput
 import org.opensearch.commons.authuser.User
 import org.opensearch.index.query.QueryBuilders
 import org.opensearch.search.builder.SearchSourceBuilder
+import org.opensearch.test.ClusterServiceUtils
 import org.opensearch.test.OpenSearchTestCase
+import org.opensearch.threadpool.ThreadPool
 
 class AnomalyDetectionUtilsTests : OpenSearchTestCase() {
+    private lateinit var settings: Settings
+    private lateinit var clusterService: ClusterService
+
+    @Before
+    fun setup() {
+        clusterService = Mockito.mock(ClusterService::class.java)
+        settings = Settings.builder().build()
+        val settingSet = hashSetOf<Setting<*>>()
+        settingSet.addAll(ClusterSettings.BUILT_IN_CLUSTER_SETTINGS)
+        val threadPool = Mockito.mock(ThreadPool::class.java)
+        val discoveryNode = DiscoveryNode("node", buildNewFakeTransportAddress(), Version.CURRENT)
+        val clusterSettings = ClusterSettings(settings, settingSet)
+        val testClusterService = ClusterServiceUtils.createClusterService(threadPool, discoveryNode, clusterSettings)
+        clusterService = Mockito.spy(testClusterService)
+    }
+
+    fun `test getADBackendRoleFilterEnabled without AD in cluster`() {
+        assertFalse(getADBackendRoleFilterEnabled(clusterService, settings))
+    }
 
     fun `test is ad monitor`() {
         val monitor = randomQueryLevelMonitor(
