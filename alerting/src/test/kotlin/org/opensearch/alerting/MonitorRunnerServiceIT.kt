@@ -1018,6 +1018,7 @@ class MonitorRunnerServiceIT : AlertingRestTestCase() {
             val searchResult = (output.objectMap("input_results")["results"] as List<Map<String, Any>>).first()
             @Suppress("UNCHECKED_CAST")
             val total = searchResult.stringMap("hits")?.get("total") as Map<String, String>
+            println("searchResult: " + searchResult)
             assertEquals("Incorrect search result", 1, total["value"])
             @Suppress("UNCHECKED_CAST")
             val maxAnomalyGrade = searchResult.stringMap("aggregations")?.get("max_anomaly_grade") as Map<String, String>
@@ -1028,6 +1029,8 @@ class MonitorRunnerServiceIT : AlertingRestTestCase() {
     fun `test execute AD monitor doesn't return search result with empty backend role`() {
         // TODO: change to REST API call to test security enabled case
         if (!securityEnabled()) {
+            enableADFilterBy()
+            enableFilterBy()
             val user = randomUser()
             val detectorId = randomAlphaOfLength(5)
             prepareTestAnomalyResult(detectorId, user)
@@ -1094,9 +1097,11 @@ class MonitorRunnerServiceIT : AlertingRestTestCase() {
             )
             val response = executeMonitor(monitor, params = DRYRUN_MONITOR)
             val output = entityAsMap(response)
+            println("output: " + output)
             @Suppress("UNCHECKED_CAST")
             (output["trigger_results"] as HashMap<String, Any>).forEach {
-                    _, v ->
+                _, v ->
+                println("v: " + v)
                 assertFalse((v as HashMap<String, Boolean>)["triggered"] as Boolean)
             }
             @Suppress("UNCHECKED_CAST")

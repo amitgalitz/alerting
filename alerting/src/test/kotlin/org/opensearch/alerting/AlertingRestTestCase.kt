@@ -87,6 +87,7 @@ abstract class AlertingRestTestCase : ODFERestTestCase() {
 
     protected val statsResponseOpendistroSweeperEnabledField = "opendistro.scheduled_jobs.enabled"
     protected val statsResponseOpenSearchSweeperEnabledField = "plugins.scheduled_jobs.enabled"
+    protected val adFilterBySetting = "plugins.anomaly_detection.filter_by_backend_roles"
 
     override fun xContentRegistry(): NamedXContentRegistry {
         return NamedXContentRegistry(
@@ -1098,6 +1099,20 @@ abstract class AlertingRestTestCase : ODFERestTestCase() {
                     .endObject().string(),
                 ContentType.APPLICATION_JSON
             )
+        )
+        assertEquals(updateResponse.statusLine.toString(), 200, updateResponse.statusLine.statusCode)
+    }
+
+    fun enableADFilterBy() {
+        val updateResponse = client().makeRequest(
+                "PUT", "_cluster/settings",
+                emptyMap(),
+                StringEntity(
+                        XContentFactory.jsonBuilder().startObject().field("transient")
+                                .startObject().field(adFilterBySetting, true).endObject()
+                                .endObject().string(),
+                        ContentType.APPLICATION_JSON
+                )
         )
         assertEquals(updateResponse.statusLine.toString(), 200, updateResponse.statusLine.statusCode)
     }
