@@ -6,8 +6,8 @@
 package org.opensearch.alerting.util
 
 import org.apache.lucene.search.join.ScoreMode
-import org.opensearch.common.Strings
 import org.opensearch.cluster.service.ClusterService
+import org.opensearch.common.Strings
 import org.opensearch.common.settings.Settings
 import org.opensearch.commons.alerting.model.Monitor
 import org.opensearch.commons.alerting.model.SearchInput
